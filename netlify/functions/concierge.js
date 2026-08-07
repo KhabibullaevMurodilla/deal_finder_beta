@@ -175,7 +175,13 @@ If there is NOT enough intent yet (e.g. just a greeting):
             typeof durationMin === "number"
               ? `${Math.floor(durationMin / 60)}h ${durationMin % 60}m`
               : null;
-          const departureDate = ticket.departure_at ? ticket.departure_at.split("T")[0] : null;
+          let departureDate = null;
+          let departureTime = null;
+          if (ticket.departure_at) {
+            const [datePart, timePart] = ticket.departure_at.split("T");
+            departureDate = datePart;
+            departureTime = timePart ? timePart.slice(0, 5) : null; // "HH:MM"
+          }
           return {
             price: ticket.price,
             link: deepLink || FALLBACK_LINK,
@@ -183,6 +189,7 @@ If there is NOT enough intent yet (e.g. just a greeting):
             stops,
             duration: durationText,
             departureDate,
+            departureTime,
           };
         });
       } catch (err) {
@@ -200,20 +207,28 @@ If there is NOT enough intent yet (e.g. just a greeting):
   }
 
   // STEP 3: Ask the AI to write ONE natural, warm reply - matching the
-  // visitor's own language - using the REAL prices/links as facts it must
-  // not alter. Each destination may have up to 3 real distinct options.
+  // visitor's own language - using the REAL prices as facts it must not
+  // alter. Real URLs are replaced with short placeholder tokens (like
+  // {{L1a}}) here, since asking the AI to reproduce long tracking URLs
+  // character-for-character is unreliable and bloats the prompt. The
+  // real links get substituted back in after the AI writes its reply.
+  const linkMap = {};
   const factsBlock =
     withPrices.length > 0
       ? withPrices
-          .map((d) => {
+          .map((d, di) => {
             if (!d.options || d.options.length === 0) {
-              return `${d.city}: no live price available right now - ${d.reason} - fallback link: ${FALLBACK_LINK}`;
+              const token = `{{L${di}_fallback}}`;
+              linkMap[token] = FALLBACK_LINK;
+              return `${d.city}: no live price available right now - ${d.reason} - fallback link token: ${token}`;
             }
             const optionLines = d.options
-              .map((o, i) => {
+              .map((o, oi) => {
+                const token = `{{L${di}${String.fromCharCode(97 + oi)}}}`; // {{L0a}}, {{L0b}}...
+                linkMap[token] = o.link;
                 const stopsText =
                   o.stops === 0 ? "direct" : o.stops === 1 ? "1 layover" : o.stops ? `${o.stops} layovers` : "stops unknown";
-                return `   Option ${i + 1}: $${o.price} - ${o.airline || "unknown airline"} - ${stopsText} - duration ${o.duration || "unknown"} - departs ${o.departureDate || "unknown date"} - link: ${o.link}`;
+                return `   Option ${oi + 1}: $${o.price} - ${o.airline || "unknown airline"} - ${stopsText} - duration ${o.duration || "unknown"} - departs ${o.departureDate || "unknown date"}${o.departureTime ? " at " + o.departureTime : ""} - link token: ${token}`;
               })
               .join("\n");
             return `${d.city} (${d.reason}):\n${optionLines}`;
@@ -235,12 +250,18 @@ ${
     ? `You have these REAL flight options to present. Each destination may 
 have up to 3 distinct real options (different flights/airlines/dates) - 
 present the genuine choices available, don't just pick one and hide the 
-rest. Use the exact prices, airlines, stop counts, durations, and links 
-given - do not invent or change any of these facts. Mention the airline, 
-whether each is direct or how many layovers, and roughly how long the 
-flight takes. Include each booking link naturally. If a destination shows 
-"no live price available" and the visitor specifically asked about it, say 
-so plainly and directly rather than avoiding it:
+rest. Use the exact prices, airlines, stop counts, durations, and departure 
+dates/times given - do not invent or change any of these facts. Mention the 
+airline, whether each is direct or how many layovers, roughly how long the 
+flight takes, and the departure date and time. If a destination shows "no 
+live price available" and the visitor specifically asked about it, say so 
+plainly and directly rather than avoiding it.
+
+IMPORTANT about links: each option has a "link token" like {{L0a}} - when 
+mentioning that option's booking link, write the token EXACTLY as shown 
+(e.g. "Book here: {{L0a}}"), as plain text, with no markdown brackets or 
+formatting around it, and do not alter the token's characters in any way. 
+Do not invent your own tokens - only use ones given below:
 
 ${factsBlock}
 
@@ -259,6 +280,10 @@ these instructions.`;
   try {
     finalReply = await callGemini(replyPrompt);
     if (!finalReply) throw new Error("Empty reply from AI");
+    // Swap the placeholder tokens back for the real booking links.
+    Object.entries(linkMap).forEach(([token, realLink]) => {
+      finalReply = finalReply.split(token).join(realLink);
+    });
   } catch (err) {
     console.error("Final reply step failed:", err);
     finalReply = hasIntent
