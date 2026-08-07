@@ -26,10 +26,13 @@ exports.handler = async function (event) {
   const ORIGIN = "TAS"; // assumed departure city for now - Tashkent
 
   if (!GEMINI_API_KEY || !TRAVELPAYOUTS_TOKEN) {
+    const missing = [];
+    if (!GEMINI_API_KEY) missing.push("GEMINI_API_KEY");
+    if (!TRAVELPAYOUTS_TOKEN) missing.push("TRAVELPAYOUTS_API_TOKEN");
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: "Server is not configured yet - missing GEMINI_API_KEY or TRAVELPAYOUTS_API_TOKEN.",
+        error: `Server is not configured yet - missing: ${missing.join(", ")}`,
       }),
     };
   }
