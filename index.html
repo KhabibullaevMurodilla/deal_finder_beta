@@ -191,7 +191,11 @@
     const div = document.createElement('div');
     div.className = 'msg ' + sender;
     if (sender === 'bot') {
-      const linked = text.replace(/(https?:\/\/\S+)/g, '<a href="$1" target="_blank" rel="noopener sponsored" style="color:var(--sky);">Book this flight →</a>');
+      // Defensive: strip markdown-style [text](url) wrapping down to just
+      // the url first, in case the AI ever emits markdown despite
+      // instructions not to - prevents double-nested link rendering.
+      const stripped = text.replace(/\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g, '$2');
+      const linked = stripped.replace(/(https?:\/\/\S+)/g, '<a href="$1" target="_blank" rel="noopener sponsored" style="color:var(--sky);">Book this flight →</a>');
       div.innerHTML = linked.replace(/\n/g, '<br>');
     } else {
       div.textContent = text;
