@@ -47,16 +47,28 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: "Missing 'message' field" }) };
   }
 
-  // STEP 1: Ask the AI for structured destination suggestions (JSON only,
-  // no prose yet) so we can look up real prices for exactly these places.
-  const structuredPrompt = `You are a travel concierge. Based on this visitor 
-message, suggest exactly 3 flight-bookable destinations (international or 
-long-haul, never local/drivable places). Respond with ONLY valid JSON, no 
-other text, no markdown fences, in this exact shape:
-{"destinations":[{"city":"Istanbul","iata":"IST","reason":"one short phrase why it fits"}]}
+  // STEP 1: Ask the AI whether this message actually contains travel intent
+  // (a budget, mood, timing, or destination hint) before inventing anything.
+  // A plain greeting or unclear message should get a normal reply asking
+  // for more detail - not 3 made-up destinations.
+  const structuredPrompt = `You are a travel concierge for flights departing 
+from Tashkent (TAS). Look at the visitor message below.
+
+If it contains real travel intent (a budget, mood, timing, or destination 
+idea), respond with ONLY this JSON shape (no markdown fences, no other text):
+{"has_intent": true, "destinations": [{"city":"Istanbul","iata":"IST","reason":"one short phrase why it fits"}]}
+- Suggest exactly 3 flight-bookable destinations (international/long-haul only).
+- NEVER suggest Tashkent or Uzbekistan itself as a destination - that's the departure city.
+
+If the message is just a greeting, unclear, or has no real travel intent, 
+respond with ONLY this JSON shape instead:
+{"has_intent": false, "reply": "a short, warm, conversational reply asking what budget, mood, or timing they have in mind"}
+
 Visitor message: ${userMessage}`;
 
+  let hasIntent = false;
   let destinations = [];
+  let directReply = null;
   try {
     const aiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -70,12 +82,27 @@ Visitor message: ${userMessage}`;
     let rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
     rawText = rawText.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(rawText);
-    destinations = parsed.destinations || [];
+    hasIntent = !!parsed.has_intent;
+    if (hasIntent) {
+      destinations = parsed.destinations || [];
+    } else {
+      directReply = parsed.reply || "What's your rough budget, mood, or timing? That'll help me suggest real destinations.";
+    }
   } catch (err) {
     console.error("AI suggestion step failed:", err);
     return {
       statusCode: 502,
       body: JSON.stringify({ error: "Could not generate suggestions right now, please try again." }),
+    };
+  }
+
+  // No real travel intent - just send back the conversational reply,
+  // no price lookups, no invented destinations.
+  if (!hasIntent) {
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reply: directReply }),
     };
   }
 
