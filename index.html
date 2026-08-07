@@ -188,7 +188,7 @@
     div.className = 'msg ' + sender;
     if (sender === 'bot') {
       // Convert any URL in the text into a real clickable link
-      const linked = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener sponsored" style="color:var(--sky);">$1</a>');
+      const linked = text.replace(/(https?:\/\/\S+)/g, '<a href="$1" target="_blank" rel="noopener sponsored" style="color:var(--sky);">Book this flight →</a>');
       div.innerHTML = linked.replace(/\n/g, '<br>');
     } else {
       div.textContent = text;
