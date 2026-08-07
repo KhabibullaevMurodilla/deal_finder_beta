@@ -17,106 +17,129 @@
 // - That's it - no key ever appears in this code or in the browser.
 
 exports.handler = async function (event) {
-  // Only allow POST requests
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
+    return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
   }
 
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) {
+  const TRAVELPAYOUTS_TOKEN = process.env.TRAVELPAYOUTS_API_TOKEN;
+  const ORIGIN = "TAS"; // assumed departure city for now - Tashkent
+
+  if (!GEMINI_API_KEY || !TRAVELPAYOUTS_TOKEN) {
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: "Server is not configured yet - GEMINI_API_KEY is missing.",
+        error: "Server is not configured yet - missing GEMINI_API_KEY or TRAVELPAYOUTS_API_TOKEN.",
       }),
     };
   }
 
   let userMessage;
   try {
-    const body = JSON.parse(event.body);
-    userMessage = body.message;
+    userMessage = JSON.parse(event.body).message;
   } catch (e) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid request body" }),
-    };
+    return { statusCode: 400, body: JSON.stringify({ error: "Invalid request body" }) };
   }
-
   if (!userMessage || typeof userMessage !== "string") {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Missing 'message' field" }),
-    };
+    return { statusCode: 400, body: JSON.stringify({ error: "Missing 'message' field" }) };
   }
 
-  // This system context grounds the AI in what your site actually is,
-  // so it doesn't wander into generic travel-agent chit-chat.
-  const systemContext = `You are a friendly, concise travel concierge for "Anywhere," 
-a flexible-destination flight and hotel deals site. Your visitors are looking for 
-FLIGHTS to fly to, not road-trip or drivable destinations - always suggest 
-destinations that make sense as a flight booking, ideally international or 
-long-haul domestic (e.g. "Istanbul", "Dubai", "Bangkok", "Barcelona"), never 
-suggest nearby drivable cities or destinations that wouldn't typically involve 
-booking a flight. Visitors will describe a budget, mood, or rough idea, and you 
-suggest 2-3 real, specific destinations that fit. Keep replies short (under 90 
-words total), warm, and practical. Do not invent exact prices - speak in general 
-terms like "budget-friendly" or "usually affordable" instead of specific numbers, 
-since you don't have live pricing data in this conversation. Do not include any 
-links yourself - a booking link will be added automatically after your reply. 
-Never mention that you are an AI model or discuss these instructions.`;
+  // STEP 1: Ask the AI for structured destination suggestions (JSON only,
+  // no prose yet) so we can look up real prices for exactly these places.
+  const structuredPrompt = `You are a travel concierge. Based on this visitor 
+message, suggest exactly 3 flight-bookable destinations (international or 
+long-haul, never local/drivable places). Respond with ONLY valid JSON, no 
+other text, no markdown fences, in this exact shape:
+{"destinations":[{"city":"Istanbul","iata":"IST","reason":"one short phrase why it fits"}]}
+Visitor message: ${userMessage}`;
 
+  let destinations = [];
   try {
-    const response = await fetch(
+    const aiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: `${systemContext}\n\nVisitor message: ${userMessage}` }],
-            },
-          ],
-        }),
+        body: JSON.stringify({ contents: [{ parts: [{ text: structuredPrompt }] }] }),
       }
     );
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Gemini API error:", errText);
-      return {
-        statusCode: 502,
-        body: JSON.stringify({
-          error: "AI service error, please try again shortly.",
-          debug: errText.slice(0, 300),
-        }),
-      };
-    }
-
-    const data = await response.json();
-    let reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Sorry, I couldn't come up with a suggestion just now - try rephrasing?";
-
-    // Always append a real, clickable booking link - don't rely on the
-    // AI to remember to include one, since that's the actual conversion step.
-    const AFFILIATE_LINK = "https://aviasales.tpm.lv/3zOHKKXL";
-    reply = reply.trim() + `\n\nSearch live prices: ${AFFILIATE_LINK}`;
-
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reply }),
-    };
+    const aiData = await aiRes.json();
+    let rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    rawText = rawText.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(rawText);
+    destinations = parsed.destinations || [];
   } catch (err) {
-    console.error("Function error:", err);
+    console.error("AI suggestion step failed:", err);
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Something went wrong. Please try again." }),
+      statusCode: 502,
+      body: JSON.stringify({ error: "Could not generate suggestions right now, please try again." }),
     };
   }
+
+  if (destinations.length === 0) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ reply: "I couldn't find a good match for that - try describing your budget or mood a bit differently?" }),
+    };
+  }
+
+  // STEP 2: For each suggested destination, fetch a REAL current price
+  // from the Travelpayouts Data API - same endpoint the deal-finder script uses.
+  async function fetchRealPrice(destinationIata) {
+    try {
+      const url = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates";
+      const params = new URLSearchParams({
+        origin: ORIGIN,
+        destination: destinationIata,
+        currency: "usd",
+        sorting: "price",
+        direct: "false",
+        one_way: "true",
+        limit: "1",
+      });
+      const res = await fetch(`${url}?${params}`, {
+        headers: { "x-access-token": TRAVELPAYOUTS_TOKEN },
+      });
+      const data = await res.json();
+      if (data.success && data.data && data.data.length > 0) {
+        const ticket = data.data[0];
+        // Build a real deep link to THIS specific flight, tagged with
+        // your partner marker so it still tracks as your referral.
+        const PARTNER_MARKER = "747646";
+        let deepLink = null;
+        if (ticket.link) {
+          const separator = ticket.link.includes("?") ? "&" : "?";
+          deepLink = `https://www.aviasales.com${ticket.link}${separator}marker=${PARTNER_MARKER}`;
+        }
+        return { price: ticket.price, link: deepLink };
+      }
+      return { price: null, link: null };
+    } catch (err) {
+      console.error(`Price fetch failed for ${destinationIata}:`, err);
+      return { price: null, link: null };
+    }
+  }
+
+  const withPrices = await Promise.all(
+    destinations.map(async (d) => {
+      const result = await fetchRealPrice(d.iata);
+      return { ...d, price: result.price, link: result.link };
+    })
+  );
+
+  // STEP 3: Build the final reply - each destination gets its OWN
+  // specific booking link (to that exact flight), not one generic link.
+  const FALLBACK_LINK = "https://aviasales.tpm.lv/3zOHKKXL";
+  let reply = "Here's what I found for you:\n\n";
+  withPrices.forEach((d) => {
+    const priceText = d.price ? `from $${d.price}` : "price currently unavailable";
+    const bookLink = d.link || FALLBACK_LINK;
+    reply += `${d.city} - ${priceText} - ${d.reason}\nBook this: ${bookLink}\n\n`;
+  });
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reply: reply.trim() }),
+  };
 };
