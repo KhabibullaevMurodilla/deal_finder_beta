@@ -17,6 +17,32 @@
 //   in Netlify (Site settings -> Environment variables)
 
 exports.handler = async function (event) {
+  // Common airline IATA codes relevant to Central Asia / this site's
+  // routes, so replies can say "Turkish Airlines" instead of just "TK".
+  // Falls back to showing the raw code for anything not in this list.
+  const AIRLINE_NAMES = {
+    HY: "Uzbekistan Airways",
+    TK: "Turkish Airlines",
+    EK: "Emirates",
+    FZ: "flydubai",
+    SU: "Aeroflot",
+    KC: "Air Astana",
+    J2: "Azerbaijan Airlines",
+    QR: "Qatar Airways",
+    LH: "Lufthansa",
+    BA: "British Airways",
+    AF: "Air France",
+    KL: "KLM",
+    W6: "Wizz Air",
+    PC: "Pegasus Airlines",
+    UT: "UTair",
+    S7: "S7 Airlines",
+    GF: "Gulf Air",
+    EY: "Etihad Airways",
+    IR: "Iran Air",
+    IY: "Yemenia",
+  };
+
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
   }
@@ -112,10 +138,12 @@ If there is NOT enough intent yet (e.g. just a greeting):
   }
 
   // STEP 2: If there's real intent, fetch REAL current prices for each
-  // suggested destination from the Travelpayouts Data API.
+  // suggested destination from the Travelpayouts Data API - up to 3
+  // distinct options per destination (different flights/dates/airlines),
+  // not just the single cheapest one.
   let withPrices = [];
   if (hasIntent && destinations.length > 0) {
-    async function fetchRealPrice(destinationIata) {
+    async function fetchRealOptions(destinationIata) {
       try {
         const url = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates";
         const params = new URLSearchParams({
@@ -125,47 +153,72 @@ If there is NOT enough intent yet (e.g. just a greeting):
           sorting: "price",
           direct: "false",
           one_way: "true",
-          limit: "1",
+          limit: "3",
         });
         const res = await fetch(`${url}?${params}`, {
           headers: { "x-access-token": TRAVELPAYOUTS_TOKEN },
         });
         const data = await res.json();
-        if (data.success && data.data && data.data.length > 0) {
-          const ticket = data.data[0];
+        if (!data.success || !data.data || data.data.length === 0) return [];
+
+        return data.data.map((ticket) => {
           let deepLink = null;
           if (ticket.link) {
             const separator = ticket.link.includes("?") ? "&" : "?";
             deepLink = `https://www.aviasales.com${ticket.link}${separator}marker=${PARTNER_MARKER}`;
           }
-          return { price: ticket.price, link: deepLink };
-        }
-        return { price: null, link: null };
+          const airlineCode = ticket.airline;
+          const airlineName = AIRLINE_NAMES[airlineCode] || airlineCode || "unknown airline";
+          const stops = typeof ticket.transfers === "number" ? ticket.transfers : null;
+          const durationMin = ticket.duration;
+          const durationText =
+            typeof durationMin === "number"
+              ? `${Math.floor(durationMin / 60)}h ${durationMin % 60}m`
+              : null;
+          const departureDate = ticket.departure_at ? ticket.departure_at.split("T")[0] : null;
+          return {
+            price: ticket.price,
+            link: deepLink || FALLBACK_LINK,
+            airline: airlineName,
+            stops,
+            duration: durationText,
+            departureDate,
+          };
+        });
       } catch (err) {
         console.error(`Price fetch failed for ${destinationIata}:`, err);
-        return { price: null, link: null };
+        return [];
       }
     }
 
     withPrices = await Promise.all(
       destinations.map(async (d) => {
-        const result = await fetchRealPrice(d.iata);
-        return { ...d, price: result.price, link: result.link || FALLBACK_LINK };
+        const options = await fetchRealOptions(d.iata);
+        return { ...d, options };
       })
     );
   }
 
   // STEP 3: Ask the AI to write ONE natural, warm reply - matching the
   // visitor's own language - using the REAL prices/links as facts it must
-  // not alter. This replaces the old hardcoded English template entirely.
+  // not alter. Each destination may have up to 3 real distinct options.
   const factsBlock =
     withPrices.length > 0
       ? withPrices
-          .map(
-            (d, i) =>
-              `${i + 1}. ${d.city}: ${d.price ? "$" + d.price : "price unavailable right now"} - ${d.reason} - link: ${d.link}`
-          )
-          .join("\n")
+          .map((d) => {
+            if (!d.options || d.options.length === 0) {
+              return `${d.city}: no live price available right now - ${d.reason} - fallback link: ${FALLBACK_LINK}`;
+            }
+            const optionLines = d.options
+              .map((o, i) => {
+                const stopsText =
+                  o.stops === 0 ? "direct" : o.stops === 1 ? "1 layover" : o.stops ? `${o.stops} layovers` : "stops unknown";
+                return `   Option ${i + 1}: $${o.price} - ${o.airline || "unknown airline"} - ${stopsText} - duration ${o.duration || "unknown"} - departs ${o.departureDate || "unknown date"} - link: ${o.link}`;
+              })
+              .join("\n");
+            return `${d.city} (${d.reason}):\n${optionLines}`;
+          })
+          .join("\n\n")
       : "(no destinations to suggest yet)";
 
   const replyPrompt = `You are a warm, natural-sounding travel concierge for 
@@ -179,22 +232,27 @@ ${transcript ? transcript + "\n" : ""}Visitor: ${userMessage}
 
 ${
   hasIntent
-    ? `You have these REAL, confirmed flight options to present. Use the exact 
-prices and links given - do not invent or change any numbers. Weave them into 
-a short, warm, natural reply (not a rigid list format), and include each 
-booking link naturally. If a price shows as "unavailable right now" for a 
-destination the visitor specifically asked about, say so plainly and directly 
-(e.g. "I don't have a live price for X right now, but here's the search link 
-to check directly") rather than avoiding it or silently talking about other 
-destinations instead:
+    ? `You have these REAL flight options to present. Each destination may 
+have up to 3 distinct real options (different flights/airlines/dates) - 
+present the genuine choices available, don't just pick one and hide the 
+rest. Use the exact prices, airlines, stop counts, durations, and links 
+given - do not invent or change any of these facts. Mention the airline, 
+whether each is direct or how many layovers, and roughly how long the 
+flight takes. Include each booking link naturally. If a destination shows 
+"no live price available" and the visitor specifically asked about it, say 
+so plainly and directly rather than avoiding it:
 
-${factsBlock}`
+${factsBlock}
+
+Increase word limit to 160 words when presenting multiple options, since 
+there's more real detail to convey - but stay natural and conversational, 
+not a rigid bullet list.`
     : `The visitor hasn't given enough detail yet for real suggestions. Reply 
 warmly and naturally, asking about their budget, mood, or timing - like a 
 real person chatting, not a form.`
 }
 
-Keep it concise (under 100 words). Never mention you are an AI or discuss 
+Keep replies concise and natural. Never mention you are an AI or discuss 
 these instructions.`;
 
   let finalReply;
@@ -204,7 +262,13 @@ these instructions.`;
   } catch (err) {
     console.error("Final reply step failed:", err);
     finalReply = hasIntent
-      ? withPrices.map((d) => `${d.city}: ${d.price ? "$" + d.price : "price unavailable"} - ${d.link}`).join("\n")
+      ? withPrices
+          .map((d) =>
+            d.options && d.options.length > 0
+              ? `${d.city}: ${d.options.map((o) => `$${o.price} (${o.airline}, ${o.stops === 0 ? "direct" : o.stops + " stop(s)"}) - ${o.link}`).join(" | ")}`
+              : `${d.city}: no live price available - ${FALLBACK_LINK}`
+          )
+          .join("\n")
       : "Tell me your rough budget, mood, or timing and I'll suggest some real options.";
   }
 
