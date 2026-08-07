@@ -86,6 +86,11 @@ If there IS enough intent:
 {"has_intent": true, "destinations": [{"city":"Istanbul","iata":"IST","reason":"one short phrase why it fits"}]}
 - Suggest exactly 3 flight-bookable destinations (international/long-haul only).
 - NEVER suggest Tashkent or Uzbekistan itself as a destination.
+- IMPORTANT: if the visitor has explicitly named a specific destination they 
+  want (anywhere in this conversation, e.g. "London"), that destination MUST 
+  be included as one of the 3, using its main IATA code. Do not quietly 
+  replace it with alternatives - a real price will be looked up for it 
+  regardless of whether you personally expect it to be cheap or available.
 
 If there is NOT enough intent yet (e.g. just a greeting):
 {"has_intent": false}`;
@@ -177,7 +182,11 @@ ${
     ? `You have these REAL, confirmed flight options to present. Use the exact 
 prices and links given - do not invent or change any numbers. Weave them into 
 a short, warm, natural reply (not a rigid list format), and include each 
-booking link naturally:
+booking link naturally. If a price shows as "unavailable right now" for a 
+destination the visitor specifically asked about, say so plainly and directly 
+(e.g. "I don't have a live price for X right now, but here's the search link 
+to check directly") rather than avoiding it or silently talking about other 
+destinations instead:
 
 ${factsBlock}`
     : `The visitor hasn't given enough detail yet for real suggestions. Reply 
