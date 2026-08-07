@@ -123,17 +123,28 @@ If there is NOT enough intent yet (e.g. just a greeting):
 
   let hasIntent = false;
   let destinations = [];
+  let rawText = "";
   try {
-    let rawText = await callGemini(intentPrompt);
-    rawText = rawText.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(rawText);
+    rawText = await callGemini(intentPrompt);
+    let cleaned = rawText.replace(/```json|```/g, "").trim();
+    // Defensive: if the AI added any stray text around the JSON despite
+    // instructions, extract just the {...} portion instead of failing outright.
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    }
+    const parsed = JSON.parse(cleaned);
     hasIntent = !!parsed.has_intent;
     destinations = parsed.destinations || [];
   } catch (err) {
-    console.error("Intent step failed:", err);
+    console.error("Intent step failed:", err, "Raw AI output was:", rawText);
     return {
       statusCode: 502,
-      body: JSON.stringify({ error: "Could not process that right now, please try again." }),
+      body: JSON.stringify({
+        error: "Could not process that right now, please try again.",
+        debug: rawText.slice(0, 300),
+      }),
     };
   }
 
