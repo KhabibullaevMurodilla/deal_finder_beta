@@ -93,7 +93,18 @@ exports.handler = async function (event) {
       }
     );
     const data = await res.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!res.ok) {
+      // Surface the REAL reason (rate limit, quota, safety block, etc.)
+      // instead of silently returning empty text and losing the cause.
+      const reason = data?.error?.message || JSON.stringify(data).slice(0, 200);
+      throw new Error(`Gemini API error (status ${res.status}): ${reason}`);
+    }
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const finishReason = data?.candidates?.[0]?.finishReason;
+    if (!text) {
+      throw new Error(`Gemini returned no text (finishReason: ${finishReason || "unknown"})`);
+    }
+    return text;
   }
 
   // STEP 1: Using the FULL conversation so far, decide if there's now
@@ -288,6 +299,7 @@ Keep replies concise and natural. Never mention you are an AI or discuss
 these instructions.`;
 
   let finalReply;
+  let replyStepError = null;
   try {
     finalReply = await callGemini(replyPrompt);
     if (!finalReply) throw new Error("Empty reply from AI");
@@ -297,6 +309,7 @@ these instructions.`;
     });
   } catch (err) {
     console.error("Final reply step failed:", err);
+    replyStepError = err.message;
     finalReply = hasIntent
       ? withPrices
           .map((d) =>
@@ -311,6 +324,9 @@ these instructions.`;
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ reply: finalReply.trim() }),
+    body: JSON.stringify({
+      reply: finalReply.trim(),
+      ...(replyStepError ? { debug: `reply step failed: ${replyStepError}` } : {}),
+    }),
   };
 };
