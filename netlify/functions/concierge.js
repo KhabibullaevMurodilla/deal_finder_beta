@@ -84,7 +84,7 @@ exports.handler = async function (event) {
     .map((m) => `${m.role === "user" ? "Visitor" : "Concierge"}: ${m.text}`)
     .join("\n");
 
-  async function callGemini(prompt) {
+  async function callGeminiOnce(prompt) {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
@@ -95,10 +95,11 @@ exports.handler = async function (event) {
     );
     const data = await res.json();
     if (!res.ok) {
-      // Surface the REAL reason (rate limit, quota, safety block, etc.)
-      // instead of silently returning empty text and losing the cause.
       const reason = data?.error?.message || JSON.stringify(data).slice(0, 200);
-      throw new Error(`Gemini API error (status ${res.status}): ${reason}`);
+      const err = new Error(`Gemini API error (status ${res.status}): ${reason}`);
+      err.status = res.status;
+      err.retryDelaySeconds = extractRetryDelay(reason);
+      throw err;
     }
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     const finishReason = data?.candidates?.[0]?.finishReason;
@@ -106,6 +107,30 @@ exports.handler = async function (event) {
       throw new Error(`Gemini returned no text (finishReason: ${finishReason || "unknown"})`);
     }
     return text;
+  }
+
+  function extractRetryDelay(message) {
+    const match = /retry in ([\d.]+)s/i.exec(message || "");
+    return match ? parseFloat(match[1]) : null;
+  }
+
+  // Netlify's free-tier functions have a short execution time budget, so
+  // this can only absorb SHORT rate-limit waits (a few seconds) - it's a
+  // partial mitigation for occasional bursts during testing, not a full
+  // fix for sustained heavy quota pressure.
+  async function callGemini(prompt) {
+    try {
+      return await callGeminiOnce(prompt);
+    } catch (err) {
+      const isRateLimit = err.status === 429;
+      const waitSeconds = err.retryDelaySeconds;
+      if (isRateLimit && waitSeconds && waitSeconds <= 6) {
+        console.log(`Rate limited, retrying once after ${waitSeconds}s...`);
+        await new Promise((resolve) => setTimeout(resolve, (waitSeconds + 0.5) * 1000));
+        return await callGeminiOnce(prompt);
+      }
+      throw err;
+    }
   }
 
   // STEP 1: Using the FULL conversation so far, decide if there's now
