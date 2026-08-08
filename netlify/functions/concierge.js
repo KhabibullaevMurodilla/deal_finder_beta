@@ -52,6 +52,7 @@ exports.handler = async function (event) {
   const ORIGIN = "TAS"; // assumed departure city for now - Tashkent
   const PARTNER_MARKER = "747646";
   const FALLBACK_LINK = "https://aviasales.tpm.lv/3zOHKKXL";
+  const STAY_LINK = "https://kkday.tpm.lv/op5AvkEc"; // KKday - general link, covers stays & experiences
 
   if (!GEMINI_API_KEY || !TRAVELPAYOUTS_TOKEN) {
     const missing = [];
@@ -130,11 +131,12 @@ If there IS enough intent:
   replace it with alternatives - a real price will be looked up for it 
   regardless of whether you personally expect it to be cheap or available.
 
-If there is NOT enough intent yet (e.g. just a greeting):
-{"has_intent": false}`;
+If there is NOT enough intent yet (e.g. just a greeting or unclear message):
+{"has_intent": false, "reply": "a short, warm, natural reply in the SAME LANGUAGE the visitor is using, asking about their budget, mood, or timing - like a real person chatting, not a form"}`;
 
   let hasIntent = false;
   let destinations = [];
+  let quickReply = null;
   let rawText = "";
   try {
     rawText = await callGemini(intentPrompt);
@@ -149,6 +151,7 @@ If there is NOT enough intent yet (e.g. just a greeting):
     const parsed = JSON.parse(cleaned);
     hasIntent = !!parsed.has_intent;
     destinations = parsed.destinations || [];
+    quickReply = parsed.reply || null;
   } catch (err) {
     console.error("Intent step failed:", err, "Raw AI output was:", rawText);
     return {
@@ -156,6 +159,20 @@ If there is NOT enough intent yet (e.g. just a greeting):
       body: JSON.stringify({
         error: "Could not process that right now, please try again.",
         debug: rawText.slice(0, 300),
+      }),
+    };
+  }
+
+  // If there's no real travel intent, we already have a natural reply
+  // from the step above - skip the second AI call entirely. This roughly
+  // halves API usage for greetings/small talk, leaving more free-tier
+  // quota available for the messages that actually need real price lookups.
+  if (!hasIntent) {
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reply: quickReply || "Tell me your rough budget, mood, or timing and I'll suggest some real options.",
       }),
     };
   }
@@ -254,7 +271,9 @@ If there is NOT enough intent yet (e.g. just a greeting):
                 return `   Option ${oi + 1}: $${o.price} - ${o.airline || "unknown airline"} - ${stopsText} - duration ${o.duration || "unknown"} - departs ${o.departureDate || "unknown date"}${o.departureTime ? " at " + o.departureTime : ""} - link token: ${token}`;
               })
               .join("\n");
-            return `${d.city} (${d.reason}):\n${optionLines}`;
+            const stayToken = `{{H${di}}}`;
+            linkMap[stayToken] = STAY_LINK;
+            return `${d.city} (${d.reason}):\n${optionLines}\n   Stay & things to do in ${d.city}: link token ${stayToken}`;
           })
           .join("\n\n")
       : "(no destinations to suggest yet)";
@@ -284,17 +303,25 @@ flight takes, and the departure date and time. If a destination shows "no
 live price available" and the visitor specifically asked about it, say so 
 plainly and directly rather than avoiding it.
 
-IMPORTANT about links: each option has a "link token" like {{L0a}} - when 
-mentioning that option's booking link, write the token EXACTLY as shown 
-(e.g. "Book here: {{L0a}}"), as plain text, with no markdown brackets or 
-formatting around it, and do not alter the token's characters in any way. 
-Do not invent your own tokens - only use ones given below:
+Each destination also has a "stay & things to do" link - after presenting 
+the flight options for a destination, naturally suggest checking that link 
+to find a place to stay and activities there, framing it as a simple 
+flight + stay package idea (e.g. "and once you land, you can find a place 
+to stay and things to do here: {{H0}}") - don't claim a bundled price or 
+that it's booked together, since flight and stay are booked separately.
+
+IMPORTANT about links: each option has a "link token" like {{L0a}} or 
+{{H0}} - when mentioning that option's booking link, write the token 
+EXACTLY as shown (e.g. "Book here: {{L0a}}"), as plain text, with no 
+markdown brackets or formatting around it, and do not alter the token's 
+characters in any way. Do not invent your own tokens - only use ones given 
+below:
 
 ${factsBlock}
 
-Increase word limit to 160 words when presenting multiple options, since 
-there's more real detail to convey - but stay natural and conversational, 
-not a rigid bullet list.`
+Increase word limit to 200 words when presenting multiple options with 
+stay suggestions, since there's more real detail to convey - but stay 
+natural and conversational, not a rigid bullet list.`
     : `The visitor hasn't given enough detail yet for real suggestions. Reply 
 warmly and naturally, asking about their budget, mood, or timing - like a 
 real person chatting, not a form.`
