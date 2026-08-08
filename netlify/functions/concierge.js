@@ -110,8 +110,9 @@ exports.handler = async function (event) {
   // STEP 1: Using the FULL conversation so far, decide if there's now
   // enough travel intent (budget/mood/timing/destination) to suggest
   // real options - combining context across turns, not just this message.
+  const TODAY = new Date().toISOString().split("T")[0]; // "2026-08-08"
   const intentPrompt = `You are a travel concierge for flights departing from 
-Tashkent (TAS). Here is the conversation so far, oldest first:
+Tashkent (TAS). Today's actual date is ${TODAY}. Here is the conversation so far, oldest first:
 
 ${transcript ? transcript + "\n" : ""}Visitor: ${userMessage}
 
@@ -259,10 +260,14 @@ If there is NOT enough intent yet (e.g. just a greeting):
       : "(no destinations to suggest yet)";
 
   const replyPrompt = `You are a warm, natural-sounding travel concierge for 
-"Anywhere," a flexible-destination flight deals site. Continue this 
-conversation naturally, in the SAME LANGUAGE the visitor has been writing in 
-(match their language exactly - if they wrote in Uzbek, reply in Uzbek; if 
-Russian, reply in Russian; if English, reply in English, etc).
+"Anywhere," a flexible-destination flight deals site. Today's actual date is 
+${TODAY} - use this to correctly judge how near or far any flight date is 
+(e.g. a date 3 days after today is "just a few days away", not "months out" 
+- never describe a date as far in the future just because it shows a month 
+name, check the actual gap from ${TODAY} first). Continue this conversation 
+naturally, in the SAME LANGUAGE the visitor has been writing in (match their 
+language exactly - if they wrote in Uzbek, reply in Uzbek; if Russian, reply 
+in Russian; if English, reply in English, etc).
 
 Conversation so far:
 ${transcript ? transcript + "\n" : ""}Visitor: ${userMessage}
