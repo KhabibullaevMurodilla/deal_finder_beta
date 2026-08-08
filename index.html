@@ -223,7 +223,8 @@
       loadingMsg.remove();
 
       if (data.reply) {
-        addMessage(data.reply, 'bot');
+        const shown = data.debug ? data.reply + '\n\n[debug: ' + data.debug + ']' : data.reply;
+        addMessage(shown, 'bot');
         conversationHistory.push({ role: 'user', text: text });
         conversationHistory.push({ role: 'assistant', text: data.reply });
       } else {
