@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anywhere - Cheap Flights from Tashkent, Samarkand and Beyond</title>
+<meta name="description" content="Find cheap flights and hotel deals from Tashkent, Samarkand and other cities to destinations worldwide. Flexible dates, flexible destinations, real live prices.">
+<meta name="keywords" content="cheap flights Tashkent, cheap flights Uzbekistan, Samarkand flights, flexible destination travel deals, Aviasales deals">
+<link rel="canonical" href="https://anywhere-deals.com/">
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Anywhere - Cheap Flights from Tashkent, Samarkand and Beyond">
+<meta property="og:description" content="Find cheap flights and hotel deals from Tashkent, Samarkand and other cities to destinations worldwide. Flexible dates, flexible destinations, real live prices.">
+<meta property="og:url" content="https://anywhere-deals.com/">
+<meta property="og:site_name" content="Anywhere">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Anywhere - Cheap Flights from Tashkent, Samarkand and Beyond">
+<meta name="twitter:description" content="Find cheap flights and hotel deals from Tashkent, Samarkand and other cities to destinations worldwide.">
+
+<link rel="icon" href="data:,">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TravelAgency",
+  "name": "Anywhere",
+  "url": "https://anywhere-deals.com/",
+  "description": "Flexible-destination flight and hotel deals from Tashkent, Samarkand and other cities worldwide.",
+  "areaServed": "Worldwide"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night: #0E1420;
+    --board: #05070B;
+    --board-slot: #0F1218;
+    --amber: #FFB000;
+    --sky: #3DB7E4;
+    --text: #EDEFF3;
+    --muted: #7C8798;
+    --line: #202838;
+    --display: 'Archivo', sans-serif;
+    --body: 'Inter', sans-serif;
+    --flap: 'IBM Plex Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--night); color: var(--text); font-family: var(--body); line-height: 1.6; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  nav { position: sticky; top: 0; z-index: 50; background: rgba(14,20,32,0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { font-family: var(--display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; }
+  .logo .dot { color: var(--amber); }
+  .navlinks { display: flex; gap: 26px; font-size: 14px; color: var(--muted); }
+  .navlinks a:hover { color: var(--sky); }
+  .navlinks a:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; border-radius: 2px; }
+
+  .hero { padding: 72px 0 48px; text-align: center; }
+  .eyebrow { font-family: var(--flap); font-size: 12px; color: var(--sky); letter-spacing: 0.08em; margin-bottom: 18px; }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 5.5vw, 56px); line-height: 1.05; letter-spacing: -0.015em; max-width: 760px; margin: 0 auto; }
+  h1 .amber { color: var(--amber); }
+  .lede { max-width: 540px; margin: 20px auto 0; color: var(--muted); font-size: 16px; }
+
+  .board-wrap { margin: 44px auto 0; max-width: 820px; }
+  .board { background: var(--board); border: 1px solid #1A2030; border-radius: 8px; padding: 18px 20px; box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6); }
+  .board-head { display: grid; grid-template-columns: 70px 1fr 90px 100px; font-family: var(--flap); font-size: 11px; color: var(--muted); padding: 6px 10px; letter-spacing: 0.06em; border-bottom: 1px solid #1A2030; margin-bottom: 6px; }
+  .board-row { display: grid; grid-template-columns: 70px 1fr 90px 100px; align-items: center; gap: 4px; padding: 9px 10px; }
+  .board-row:nth-child(odd) { background: rgba(255,255,255,0.015); }
+  .flap { font-family: var(--flap); font-weight: 600; color: var(--amber); background: var(--board-slot); border-radius: 3px; padding: 6px 4px; text-align: center; font-size: 13px; letter-spacing: 0.02em; }
+  .flap.dest { background: transparent; color: var(--text); text-align: left; padding-left: 6px; font-weight: 500; }
+  .flap.price { color: var(--sky); }
+  @media (max-width: 640px) {
+    .board-head, .board-row { grid-template-columns: 50px 1fr 70px 76px; font-size: 11px; }
+    .flap { font-size: 11px; padding: 5px 3px; }
+  }
+
+  .cta-row { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn { font-family: var(--body); font-weight: 600; font-size: 14px; padding: 13px 26px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s; }
+  .btn-primary { background: var(--amber); color: #1A1200; }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-ghost { border: 1px solid var(--line); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--sky); color: var(--sky); }
+
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  .section-head { text-align: center; max-width: 560px; margin: 0 auto 36px; }
+  .section-head .eyebrow { justify-content: center; display: flex; }
+  h2 { font-family: var(--display); font-weight: 700; font-size: clamp(22px, 3vw, 30px); }
+  .widget-frame { border: 1px solid var(--line); background: #0B111C; border-radius: 10px; padding: 20px; min-height: 100px; }
+  .widget-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .widget-row .widget-frame { min-height: 80px; padding: 14px; }
+  @media (max-width: 800px) {
+    .widget-row { grid-template-columns: 1fr; }
+  }
+
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .step { background: var(--night); padding: 26px; }
+  .step .n { font-family: var(--flap); color: var(--amber); font-size: 13px; }
+  .step h3 { font-family: var(--display); font-size: 17px; margin: 10px 0 8px; }
+  .step p { color: var(--muted); font-size: 14px; }
+
+  .deals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .deal-card { border: 1px solid var(--line); border-radius: 8px; padding: 20px; background: #0B111C; transition: border-color 0.2s; }
+  .deal-card:hover { border-color: var(--sky); }
+  .deal-route { font-family: var(--flap); font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .deal-dest { font-family: var(--display); font-weight: 700; font-size: 19px; margin-bottom: 6px; }
+  .deal-price { font-family: var(--flap); color: var(--amber); font-size: 20px; font-weight: 600; }
+  .deal-price span { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .deal-link { display: block; margin-top: 14px; font-size: 13px; color: var(--sky); }
+
+  .tg-band { background: linear-gradient(180deg, rgba(61,183,228,0.08), transparent); border: 1px solid var(--line); border-radius: 10px; padding: 36px; text-align: center; }
+  .tg-band h3 { font-family: var(--display); font-size: 22px; margin-bottom: 10px; }
+  .tg-band p { color: var(--muted); max-width: 460px; margin: 0 auto 20px; font-size: 14px; }
+
+  footer { padding: 32px 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .disclosure { max-width: 640px; margin-top: 10px; line-height: 1.6; }
+</style>
+
+<script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">
+  (function () {
+      var script = document.createElement("script");
+      script.async = 1;
+      script.setAttribute("data-cmp-ab","2");
+      script.src = 'https://emrldtp.cc/NTY3ODc0.js?t=567874';
+      document.head.appendChild(script);
+  })();
+</script>
+
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">anywhere<span class="dot">.</span></div>
+    <div class="navlinks">
+      <a href="#search">search</a>
+      <a href="#deals">deals</a>
+      <a href="#how">how it works</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">FLEXIBLE DATES - FLEXIBLE DESTINATIONS - ANY COUNTRY</div>
+    <h1>Do not pick a destination. <span class="amber">Pick a price.</span></h1>
+    <p class="lede">Real-time flight and hotel deals from anywhere to anywhere, built for travelers who care more about the deal than the destination.</p>
+
+    <div class="board-wrap">
+      <div class="eyebrow" style="text-align:left;margin-bottom:8px;">LIVE - POPULAR RIGHT NOW</div>
+      <div class="widget-row" id="popular-now-slot">
+        <div class="widget-frame"><p style="color:var(--muted);font-family:var(--flap);font-size:12px;text-align:center;">Loading...</p></div>
+        <div class="widget-frame"><p style="color:var(--muted);font-family:var(--flap);font-size:12px;text-align:center;">Loading...</p></div>
+        <div class="widget-frame"><p style="color:var(--muted);font-family:var(--flap);font-size:12px;text-align:center;">Loading...</p></div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://aviasales.tpm.lv/3zOHKKXL" target="_blank" rel="noopener sponsored">Search flights</a>
+    </div>
+  </div>
+</header>
+
+<section id="search">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">STEP 01 - SEARCH</div>
+      <h2>Search real flights, right here</h2>
+    </div>
+    <div class="widget-frame" id="widget-slot">
+      <p style="color:var(--muted);font-family:var(--flap);font-size:13px;text-align:center;">Loading search...</p>
+    </div>
+  </div>
+</section>
+
+<section id="deals">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">STEP 02 - TODAY'S DEALS</div>
+      <h2>Real, live prices on popular routes</h2>
+    </div>
+    <div class="widget-row" id="todays-deals-slot">
+      <div class="widget-frame"><p style="color:var(--muted);font-family:var(--flap);font-size:12px;text-align:center;">Loading...</p></div>
+      <div class="widget-frame"><p style="color:var(--muted);font-family:var(--flap);font-size:12px;text-align:center;">Loading...</p></div>
+      <div class="widget-frame"><p style="color:var(--muted);font-family:var(--flap);font-size:12px;text-align:center;">Loading...</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="map">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">PICK A PRICE, NOT A DESTINATION</div>
+      <h2>See where your budget can take you</h2>
+    </div>
+    <div class="widget-frame" id="map-widget-slot">
+      <p style="color:var(--muted);font-family:var(--flap);font-size:13px;text-align:center;">Detecting your location...</p>
+    </div>
+  </div>
+</section>
+
+<section id="ai-deals">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">AI-DETECTED - UPDATED DAILY</div>
+      <h2>Prices our system flagged as unusually low</h2>
+    </div>
+    <div class="deals-grid" id="ai-deals-grid">
+      <p style="color:var(--muted);font-family:var(--flap);font-size:13px;text-align:center;grid-column:1/-1;">Loading live deals...</p>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">STEP 03 - HOW IT WORKS</div>
+      <h2>No middleman markup, no lock-in</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">01</div>
+        <h3>Search or browse</h3>
+        <p>Use the search widget above, or scan today's curated deals below.</p>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <h3>Book on the airline or hotel's own site</h3>
+        <p>You are taken to the real airline, agency, or hotel platform to complete your booking directly and securely.</p>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <h3>We earn a small referral fee</h3>
+        <p>At no extra cost to you - that is how this stays free to use.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="flex-direction:column;">
+    <div class="wrap" style="padding:0;display:flex;justify-content:space-between;flex-wrap:wrap;width:100%;">
+      <div>(c) 2026 anywhere.</div>
+      <div>Built for travelers, not against your wallet.</div>
+    </div>
+    <div class="disclosure">Disclosure: some links on this site are affiliate links. If you book through them, we may earn a small commission at no extra cost to you. We only feature deals we would book ourselves.</div>
+  </div>
+</footer>
+
+<script>
+  // ============================================================
+  // LOCATION DETECTION - no permission prompt needed.
+  // Uses free IP-geolocation lookup (reads the visitor's IP address
+  // server-side, on ipwho.is's end) instead of the browser's
+  // Geolocation API, which requires a permission popup most visitors
+  // decline. This is approximate (city/country level), not exact.
+  // ============================================================
+  const COUNTRY_TO_AIRPORT = {
+    UZ: { code: "TAS", lat: 41.2646, lng: 69.2163 }, // Uzbekistan -> Tashkent
+    RU: { code: "MOW", lat: 55.7558, lng: 37.6173 }, // Russia -> Moscow
+    KZ: { code: "ALA", lat: 43.2220, lng: 76.8512 }, // Kazakhstan -> Almaty
+    TR: { code: "IST", lat: 41.0082, lng: 28.9784 }, // Turkey -> Istanbul
+    GB: { code: "LON", lat: 51.5072, lng: -0.1276 }, // UK -> London
+    US: { code: "NYC", lat: 40.7128, lng: -74.0060 }, // USA -> New York
+    DE: { code: "BER", lat: 52.5200, lng: 13.4050 }, // Germany -> Berlin
+    FR: { code: "PAR", lat: 48.8566, lng: 2.3522 },  // France -> Paris
+    AE: { code: "DXB", lat: 25.2048, lng: 55.2708 }, // UAE -> Dubai
+    KR: { code: "ICN", lat: 37.5665, lng: 126.9780 }, // South Korea -> Seoul
+    IN: { code: "DEL", lat: 28.6139, lng: 77.2090 }, // India -> Delhi
+    ES: { code: "MAD", lat: 40.4168, lng: -3.7038 }, // Spain -> Madrid
+  };
+  const DEFAULT_ORIGIN = COUNTRY_TO_AIRPORT.UZ; // fallback if detection fails
+
+  async function detectOrigin() {
+    try {
+      const res = await fetch("https://ipwho.is/");
+      const data = await res.json();
+      if (data && data.success !== false && data.country_code) {
+        const match = COUNTRY_TO_AIRPORT[data.country_code];
+        if (match) return { ...match, detected: true, city: data.city, countryCode: data.country_code };
+        // Country not in our list - use the visitor's real coordinates
+        // with a sensible default airport code, rather than forcing Tashkent.
+        return {
+          code: DEFAULT_ORIGIN.code,
+          lat: data.latitude || DEFAULT_ORIGIN.lat,
+          lng: data.longitude || DEFAULT_ORIGIN.lng,
+          detected: true,
+          city: data.city,
+          countryCode: data.country_code,
+        };
+      }
+    } catch (err) {
+      console.error("Location detection failed, using default:", err);
+    }
+    return { ...DEFAULT_ORIGIN, detected: false, countryCode: "UZ" };
+  }
+
+  function buildMapWidget(origin) {
+    const slot = document.getElementById("map-widget-slot");
+    const script = document.createElement("script");
+    script.async = true;
+    script.charset = "utf-8";
+    script.src =
+      "https://tpembd.com/content?currency=usd&trs=547262&shmarker=747646" +
+      `&lat=${origin.lat}&lng=${origin.lng}&powered_by=true&search_host=www.aviasales.com%2Fsearch` +
+      `&locale=en&origin=${origin.code}&value_min=0&value_max=1000000&round_trip=true&only_direct=false` +
+      "&radius=1&draggable=true&disable_zoom=false&show_logo=false&scrollwheel=false" +
+      "&primary=%233DB7E4&secondary=%233DB7E4&light=%230E1420&width=1500&height=500&zoom=2&promo_id=4054&campaign_id=100";
+    slot.innerHTML = "";
+    slot.appendChild(script);
+  }
+
+  function buildSearchWidget(origin) {
+    const slot = document.getElementById("widget-slot");
+    const script = document.createElement("script");
+    script.async = true;
+    script.charset = "utf-8";
+    script.src =
+      "https://tpembd.com/content?currency=usd&trs=547262&shmarker=747646&show_hotels=true&powered_by=true" +
+      `&locale=en&searchUrl=www.aviasales.com%2Fsearch&origin=${origin.code}` +
+      "&primary_override=%233DB7E4&color_button=%233DB7E4&color_icons=%233DB7E4&dark=%230E1420" +
+      "&light=%23EDEFF3&secondary=%230B111C&special=%237C8798&color_focused=%233DB7E4&border_radius=8" +
+      "&plain=false&promo_id=7879&campaign_id=100";
+    slot.innerHTML = "";
+    slot.appendChild(script);
+  }
+
+  let detectedOrigin = DEFAULT_ORIGIN;
+  const originReady = detectOrigin().then(function (origin) {
+    detectedOrigin = origin;
+    buildMapWidget(origin);
+    buildSearchWidget(origin);
+    buildDestinationSections(origin);
+    return origin;
+  });
+
+  // ============================================================
+  // ADAPTIVE DESTINATION SETS - which destinations get featured in
+  // "Popular Right Now" and "Today's Deals" depends on the visitor's
+  // detected region, instead of always showing the same fixed cities.
+  // (Note: the underlying widget only supports filtering by
+  // DESTINATION, not by origin, so this adapts WHICH destinations
+  // are shown, not the visitor's own city within the widget itself -
+  // that part is handled separately by the search/map widgets above,
+  // which DO support a real origin parameter.)
+  // ============================================================
+  const REGION_KEY_BY_COUNTRY = {
+    UZ: "central_asia", KZ: "central_asia",
+    RU: "cis",
+    GB: "europe", DE: "europe", FR: "europe", ES: "europe",
+    AE: "middle_east",
+    KR: "asia_pacific", IN: "asia_pacific",
+    US: "americas",
+  };
+  const DESTINATION_SETS = {
+    central_asia: { popularNow: ["IST", "DXB", "BKK"], todaysDeals: ["MOW", "GYD", "BCN"] },
+    cis:          { popularNow: ["IST", "DXB", "TAS"], todaysDeals: ["BKK", "BCN", "GYD"] },
+    europe:       { popularNow: ["TAS", "IST", "DXB"], todaysDeals: ["BKK", "DEL", "ICN"] },
+    middle_east:  { popularNow: ["IST", "LON", "PAR"], todaysDeals: ["BCN", "BKK", "DEL"] },
+    asia_pacific: { popularNow: ["DXB", "IST", "BKK"], todaysDeals: ["PAR", "BCN", "LON"] },
+    americas:     { popularNow: ["IST", "DXB", "BCN"], todaysDeals: ["BKK", "TAS", "LON"] },
+    default:      { popularNow: ["IST", "DXB", "BKK"], todaysDeals: ["BCN", "LON", "TAS"] },
+  };
+
+  function buildDestinationWidgetRow(slotId, destinationCodes) {
+    const slot = document.getElementById(slotId);
+    slot.innerHTML = "";
+    destinationCodes.forEach(function (code) {
+      const frame = document.createElement("div");
+      frame.className = "widget-frame";
+      const script = document.createElement("script");
+      script.async = true;
+      script.charset = "utf-8";
+      script.src =
+        "https://tpembd.com/content?currency=usd&trs=547262&shmarker=747646" +
+        `&destination=${code}&target_host=www.aviasales.com%2Fsearch&locale=en&limit=6` +
+        "&powered_by=true&primary=%233DB7E4&promo_id=4044&campaign_id=100";
+      frame.appendChild(script);
+      slot.appendChild(frame);
+    });
+  }
+
+  function buildDestinationSections(origin) {
+    const regionKey = REGION_KEY_BY_COUNTRY[origin.countryCode] || "default";
+    const set = DESTINATION_SETS[regionKey] || DESTINATION_SETS.default;
+    buildDestinationWidgetRow("popular-now-slot", set.popularNow);
+    buildDestinationWidgetRow("todays-deals-slot", set.todaysDeals);
+  }
+
+  // Pulls the daily-updated deal data produced by deal_finder.py
+  // (runs automatically via GitHub Actions) directly from the repo's
+  // raw JSON file - no backend needed, just a public GitHub repo.
+  // BETA TEST VERSION: points at deal_finder_beta's own isolated data file,
+  // not the production deal_finder repo - so testing here never touches
+  // or depends on the live site's real data.
+  const DEALS_JSON_URL = "https://raw.githubusercontent.com/KhabibullaevMurodilla/deal_finder_beta/main/todays_deals.json";
+  const AVIASALES_LINK = "https://aviasales.tpm.lv/3zOHKKXL";
+
+  originReady.then(function () {
+    fetch(DEALS_JSON_URL, { cache: "no-store" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then(function (data) {
+        renderAiDeals(data);
+      })
+      .catch(function (err) {
+        console.error("Could not load live deal data:", err);
+        const grid = document.getElementById('ai-deals-grid');
+        grid.innerHTML = '<p style="color:var(--muted);font-family:var(--flap);font-size:13px;text-align:center;grid-column:1/-1;">Live deals are updating - check back shortly.</p>';
+      });
+  });
+
+  function renderAiDeals(data) {
+    const grid = document.getElementById('ai-deals-grid');
+    grid.innerHTML = '';
+
+    let tracked = (data.tracked_deals || []).filter(function (d) { return d.is_deal; });
+    let special = data.special_offers || [];
+
+    // Prefer deals that match the visitor's detected home city (e.g. a
+    // Moscow visitor sees "Moscow -> ..." deals first) - but only if
+    // deal_finder.py is actually tracking routes from that city. If
+    // nothing matches, honestly fall back to showing everything rather
+    // than an empty section.
+    const cityGuess = (detectedOrigin.city || "").toLowerCase();
+    if (cityGuess) {
+      const trackedMatch = tracked.filter(function (d) {
+        return d.route_label.toLowerCase().indexOf(cityGuess) === 0;
+      });
+      const specialMatch = special.filter(function (d) {
+        return d.route_label.toLowerCase().indexOf(cityGuess) === 0;
+      });
+      if (trackedMatch.length > 0 || specialMatch.length > 0) {
+        tracked = trackedMatch;
+        special = specialMatch;
+      }
+      // else: no routes tracked from this visitor's city yet - show the
+      // full unfiltered list below rather than nothing.
+    }
+
+    if (tracked.length === 0 && special.length === 0) {
+      grid.innerHTML = '<p style="color:var(--muted);font-family:var(--flap);font-size:13px;text-align:center;grid-column:1/-1;">No standout deals flagged right now - check back tomorrow.</p>';
+      return;
+    }
+
+    tracked.forEach(function (d) {
+      const card = document.createElement('div');
+      card.className = 'deal-card';
+      const link = d.link || AVIASALES_LINK;
+      const timingColor = d.timing_label === 'departing soon' ? 'var(--green)' : d.timing_label === 'early-bird (departing far out)' ? 'var(--muted)' : 'var(--amber)';
+      const daysText = typeof d.days_until_departure === 'number' ? `departs in ${d.days_until_departure} day${d.days_until_departure === 1 ? '' : 's'}` : 'departure date unknown';
+      card.innerHTML =
+        '<div class="deal-route">' + d.route_label + '</div>' +
+        '<div class="deal-dest">$' + d.latest_price + '</div>' +
+        '<div class="deal-price">' + d.pct_below_average + '% <span>below usual average</span></div>' +
+        '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + ' &middot; ' + (d.timing_label || 'timing unknown') + '</div>' +
+        '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>';
+      grid.appendChild(card);
+    });
+
+    special.slice(0, 9).forEach(function (d) {
+      const card = document.createElement('div');
+      card.className = 'deal-card';
+      const link = d.link || AVIASALES_LINK;
+      const timingColor = d.timing_label === 'departing soon' ? 'var(--green)' : d.timing_label === 'early-bird (departing far out)' ? 'var(--muted)' : 'var(--amber)';
+      const daysText = typeof d.days_until_departure === 'number' ? `departs in ${d.days_until_departure} day${d.days_until_departure === 1 ? '' : 's'}` : 'departure date unknown';
+      card.innerHTML =
+        '<div class="deal-route">' + d.route_label + '</div>' +
+        '<div class="deal-dest">$' + d.price + '</div>' +
+        '<div class="deal-price" style="color:var(--sky);">flagged by Aviasales <span>' + (d.airline || '') + '</span></div>' +
+        '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + ' &middot; ' + (d.timing_label || 'timing unknown') + '</div>' +
+        '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>';
+      grid.appendChild(card);
+    });
+  }
+</script>
+
+</body>
+</html>
