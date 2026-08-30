@@ -401,16 +401,24 @@
   // not the production deal_finder repo - so testing here never touches
   // or depends on the live site's real data.
   const DEALS_JSON_URL = "https://raw.githubusercontent.com/KhabibullaevMurodilla/deal_finder_beta/main/todays_deals.json";
+  const TRACKING_JSON_URL = "https://raw.githubusercontent.com/KhabibullaevMurodilla/deal_finder_beta/main/destinations_tracking.json";
   const AVIASALES_LINK = "https://aviasales.tpm.lv/3zOHKKXL";
+  const BLOG_BASE_URL = "https://anywhere-deals.com/blog/"; // update if testing on a beta domain
 
   originReady.then(function () {
-    fetch(DEALS_JSON_URL, { cache: "no-store" })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Network response was not ok");
+    Promise.all([
+      fetch(DEALS_JSON_URL, { cache: "no-store" }).then(function (res) {
+        if (!res.ok) throw new Error("deals fetch failed");
         return res.json();
-      })
-      .then(function (data) {
-        renderAiDeals(data);
+      }),
+      // Tracking file might not exist yet (no articles published so far) -
+      // treat that as "no articles" rather than a hard failure.
+      fetch(TRACKING_JSON_URL, { cache: "no-store" })
+        .then(function (res) { return res.ok ? res.json() : {}; })
+        .catch(function () { return {}; }),
+    ])
+      .then(function (results) {
+        renderAiDeals(results[0], results[1]);
       })
       .catch(function (err) {
         console.error("Could not load live deal data:", err);
@@ -419,7 +427,7 @@
       });
   });
 
-  function renderAiDeals(data) {
+  function renderAiDeals(data, tracking) {
     const grid = document.getElementById('ai-deals-grid');
     grid.innerHTML = '';
 
@@ -452,6 +460,20 @@
       return;
     }
 
+    function extractDestination(routeLabel) {
+      const parts = routeLabel.split('->');
+      return parts[parts.length - 1].trim();
+    }
+
+    function browseLinkHtml(routeLabel) {
+      const destination = extractDestination(routeLabel);
+      const entry = tracking && tracking[destination];
+      if (entry && entry.article_generated && entry.slug) {
+        return '<a class="deal-link" href="' + BLOG_BASE_URL + entry.slug + '.html" style="color:var(--sky);margin-top:6px;">Browse ' + destination + ' &rarr;</a>';
+      }
+      return '';
+    }
+
     tracked.forEach(function (d) {
       const card = document.createElement('div');
       card.className = 'deal-card';
@@ -463,7 +485,8 @@
         '<div class="deal-dest">$' + d.latest_price + '</div>' +
         '<div class="deal-price">' + d.pct_below_average + '% <span>below usual average</span></div>' +
         '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + '</div>' +
-        '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>';
+        '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>' +
+        browseLinkHtml(d.route_label);
       grid.appendChild(card);
     });
 
@@ -478,7 +501,8 @@
         '<div class="deal-dest">$' + d.price + '</div>' +
         '<div class="deal-price" style="color:var(--sky);">spotted as a low fare <span>' + (d.airline || '') + '</span></div>' +
         '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + '</div>' +
-        '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>';
+        '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>' +
+        browseLinkHtml(d.route_label);
       grid.appendChild(card);
     });
   }
