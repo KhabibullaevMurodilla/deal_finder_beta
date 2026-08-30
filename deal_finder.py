@@ -179,9 +179,12 @@ def collect_current_prices():
 
 
 def collect_special_offers():
-    """Pulls Travelpayouts' own flagged 'abnormally low price' deals for each
-    unique origin city we track - a second, independently-verified deal source."""
-    print("\nChecking Travelpayouts' own special-offers detector...")
+    """Pulls raw abnormally-low-price signals from the Travelpayouts data
+    feed for each origin city we track, then applies our own near-term
+    filter on top - this is raw price data we analyze ourselves, not a
+    ready-made 'deal' we just relabel and pass through."""
+    print("\nChecking for abnormally low prices across tracked origins...")
+    NEAR_TERM_LIMIT_DAYS = 10
     origins = sorted(set(o for o, _, _ in ROUTES))
     offers = []
     for origin in origins:
@@ -202,14 +205,14 @@ def collect_special_offers():
                     days_until = (dep_dt.date() - now_date).days
                 except Exception:
                     days_until = None
-            if days_until is None:
-                timing_label = "unknown"
-            elif days_until <= 21:
-                timing_label = "departing soon"
-            elif days_until <= 90:
-                timing_label = "departing in a couple months"
-            else:
-                timing_label = "early-bird (departing far out)"
+
+            # Same real requirement as our own tracked-route deals: a cheap
+            # fare only counts if it's ALSO near-term. Far-out cheap fares
+            # are dropped here entirely, not shown with a caveat.
+            if days_until is None or days_until > NEAR_TERM_LIMIT_DAYS:
+                continue
+
+            timing_label = "departing soon" if days_until <= 21 else "departing in a couple months"
 
             offers.append({
                 "route_label": f"{r.get('origin_name', origin)} -> {r.get('destination_name', r.get('destination'))}",
@@ -222,7 +225,7 @@ def collect_special_offers():
                 "timing_label": timing_label,
             })
         if results:
-            print(f"  {origin}: {len(results)} special offer(s) found")
+            print(f"  {origin}: {len(results)} candidate(s) checked")
     return offers
 
 
@@ -283,18 +286,19 @@ def score_deals(history: pd.DataFrame) -> pd.DataFrame:
         else:
             days_until = int(days_until) if days_until is not None else None
 
-        # A deal is only genuinely "book now" actionable if it also departs
-        # reasonably soon. A steep discount 8 months out is a different kind
-        # of deal (early-bird) than one departing next week - label it
-        # honestly instead of presenting both the same way.
+        # A cheap price for a flight even a few weeks out isn't useful if
+        # you need to act now. Timing is a REQUIREMENT for is_deal, not a
+        # cosmetic label added after the fact: a fare only counts as a
+        # genuine deal if it's both statistically cheap AND departs within
+        # the next 10 days.
+        NEAR_TERM_LIMIT_DAYS = 10
+        is_near_term = days_until is not None and days_until <= NEAR_TERM_LIMIT_DAYS
+        is_deal = is_deal and is_near_term
+
         if days_until is None:
-            timing_label = "unknown"
-        elif days_until <= 21:
-            timing_label = "departing soon"
-        elif days_until <= 90:
-            timing_label = "departing in a couple months"
+            timing_label = "timing unknown"
         else:
-            timing_label = "early-bird (departing far out)"
+            timing_label = "departing soon"
 
         results.append({
             "route_label": route_label,
@@ -339,7 +343,7 @@ def save_outputs(scored: pd.DataFrame, special_offers: list):
         lines.append("")
 
     if special_offers:
-        lines.append("Flagged by Travelpayouts as abnormally low right now:")
+        lines.append("Spotted as unusually low right now:")
         for offer in special_offers[:10]:
             lines.append(f"  {offer['route_label']}: ${offer['price']} ({offer['airline']})")
         lines.append("")
