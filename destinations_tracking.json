@@ -98,5 +98,10 @@
     "destination": "Warsaw",
     "first_seen": "2026-08-30",
     "article_generated": false
+  },
+  "Bodrum": {
+    "destination": "Bodrum",
+    "first_seen": "2026-08-30",
+    "article_generated": false
   }
 }
