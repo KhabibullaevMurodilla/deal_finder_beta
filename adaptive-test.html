@@ -456,13 +456,13 @@
       const card = document.createElement('div');
       card.className = 'deal-card';
       const link = d.link || AVIASALES_LINK;
-      const timingColor = d.timing_label === 'departing soon' ? 'var(--green)' : d.timing_label === 'early-bird (departing far out)' ? 'var(--muted)' : 'var(--amber)';
+      const timingColor = d.timing_label === 'departing soon' ? 'var(--green)' : 'var(--amber)';
       const daysText = typeof d.days_until_departure === 'number' ? `departs in ${d.days_until_departure} day${d.days_until_departure === 1 ? '' : 's'}` : 'departure date unknown';
       card.innerHTML =
         '<div class="deal-route">' + d.route_label + '</div>' +
         '<div class="deal-dest">$' + d.latest_price + '</div>' +
         '<div class="deal-price">' + d.pct_below_average + '% <span>below usual average</span></div>' +
-        '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + ' &middot; ' + (d.timing_label || 'timing unknown') + '</div>' +
+        '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + '</div>' +
         '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>';
       grid.appendChild(card);
     });
@@ -471,13 +471,13 @@
       const card = document.createElement('div');
       card.className = 'deal-card';
       const link = d.link || AVIASALES_LINK;
-      const timingColor = d.timing_label === 'departing soon' ? 'var(--green)' : d.timing_label === 'early-bird (departing far out)' ? 'var(--muted)' : 'var(--amber)';
+      const timingColor = d.timing_label === 'departing soon' ? 'var(--green)' : 'var(--amber)';
       const daysText = typeof d.days_until_departure === 'number' ? `departs in ${d.days_until_departure} day${d.days_until_departure === 1 ? '' : 's'}` : 'departure date unknown';
       card.innerHTML =
         '<div class="deal-route">' + d.route_label + '</div>' +
         '<div class="deal-dest">$' + d.price + '</div>' +
-        '<div class="deal-price" style="color:var(--sky);">flagged by Aviasales <span>' + (d.airline || '') + '</span></div>' +
-        '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + ' &middot; ' + (d.timing_label || 'timing unknown') + '</div>' +
+        '<div class="deal-price" style="color:var(--sky);">spotted as a low fare <span>' + (d.airline || '') + '</span></div>' +
+        '<div style="font-family:var(--flap);font-size:11px;color:' + timingColor + ';margin-top:4px;">' + daysText + '</div>' +
         '<a class="deal-link" href="' + link + '" target="_blank" rel="noopener sponsored">Book this flight</a>';
       grid.appendChild(card);
     });
