@@ -103,5 +103,65 @@
     "destination": "Bodrum",
     "first_seen": "2026-08-30",
     "article_generated": false
+  },
+  "Bengaluru": {
+    "destination": "Bengaluru",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Bishkek": {
+    "destination": "Bishkek",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Bukhara": {
+    "destination": "Bukhara",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Dalaman": {
+    "destination": "Dalaman",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Fergana": {
+    "destination": "Fergana",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Izmir": {
+    "destination": "Izmir",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Karachi": {
+    "destination": "Karachi",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Lahore": {
+    "destination": "Lahore",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Riga": {
+    "destination": "Riga",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Sukhumi": {
+    "destination": "Sukhumi",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Tallinn": {
+    "destination": "Tallinn",
+    "first_seen": "2026-08-31",
+    "article_generated": false
+  },
+  "Tirana": {
+    "destination": "Tirana",
+    "first_seen": "2026-08-31",
+    "article_generated": false
   }
 }
