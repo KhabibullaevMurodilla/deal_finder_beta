@@ -163,5 +163,40 @@
     "destination": "Tirana",
     "first_seen": "2026-08-31",
     "article_generated": false
+  },
+  "Mauritius": {
+    "destination": "Mauritius",
+    "first_seen": "2026-09-01",
+    "article_generated": false
+  },
+  "Minsk": {
+    "destination": "Minsk",
+    "first_seen": "2026-09-01",
+    "article_generated": false
+  },
+  "Nice": {
+    "destination": "Nice",
+    "first_seen": "2026-09-01",
+    "article_generated": false
+  },
+  "Phuket": {
+    "destination": "Phuket",
+    "first_seen": "2026-09-01",
+    "article_generated": false
+  },
+  "Prague": {
+    "destination": "Prague",
+    "first_seen": "2026-09-01",
+    "article_generated": false
+  },
+  "Tunis": {
+    "destination": "Tunis",
+    "first_seen": "2026-09-01",
+    "article_generated": false
+  },
+  "Yerevan": {
+    "destination": "Yerevan",
+    "first_seen": "2026-09-01",
+    "article_generated": false
   }
 }
