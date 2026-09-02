@@ -198,5 +198,45 @@
     "destination": "Yerevan",
     "first_seen": "2026-09-01",
     "article_generated": false
+  },
+  "Abu Dhabi": {
+    "destination": "Abu Dhabi",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Catania": {
+    "destination": "Catania",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Chennai": {
+    "destination": "Chennai",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Dabaa City": {
+    "destination": "Dabaa City",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Jakarta": {
+    "destination": "Jakarta",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Kozhikode": {
+    "destination": "Kozhikode",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Kuala Lumpur": {
+    "destination": "Kuala Lumpur",
+    "first_seen": "2026-09-02",
+    "article_generated": false
+  },
+  "Pescara": {
+    "destination": "Pescara",
+    "first_seen": "2026-09-02",
+    "article_generated": false
   }
 }
