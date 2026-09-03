@@ -238,5 +238,35 @@
     "destination": "Pescara",
     "first_seen": "2026-09-02",
     "article_generated": false
+  },
+  "Bucharest": {
+    "destination": "Bucharest",
+    "first_seen": "2026-09-03",
+    "article_generated": false
+  },
+  "Dubai": {
+    "destination": "Dubai",
+    "first_seen": "2026-09-03",
+    "article_generated": false
+  },
+  "Hamburg": {
+    "destination": "Hamburg",
+    "first_seen": "2026-09-03",
+    "article_generated": false
+  },
+  "Hurghada": {
+    "destination": "Hurghada",
+    "first_seen": "2026-09-03",
+    "article_generated": false
+  },
+  "Istanbul": {
+    "destination": "Istanbul",
+    "first_seen": "2026-09-03",
+    "article_generated": false
+  },
+  "Turkistan": {
+    "destination": "Turkistan",
+    "first_seen": "2026-09-03",
+    "article_generated": false
   }
 }
