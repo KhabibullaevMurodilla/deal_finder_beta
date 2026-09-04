@@ -268,5 +268,30 @@
     "destination": "Turkistan",
     "first_seen": "2026-09-03",
     "article_generated": false
+  },
+  "Belfast": {
+    "destination": "Belfast",
+    "first_seen": "2026-09-04",
+    "article_generated": false
+  },
+  "Dushanbe": {
+    "destination": "Dushanbe",
+    "first_seen": "2026-09-04",
+    "article_generated": false
+  },
+  "Oslo": {
+    "destination": "Oslo",
+    "first_seen": "2026-09-04",
+    "article_generated": false
+  },
+  "Perth": {
+    "destination": "Perth",
+    "first_seen": "2026-09-04",
+    "article_generated": false
+  },
+  "Sharm el Sheikh": {
+    "destination": "Sharm el Sheikh",
+    "first_seen": "2026-09-04",
+    "article_generated": false
   }
 }
