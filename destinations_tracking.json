@@ -293,5 +293,20 @@
     "destination": "Sharm el Sheikh",
     "first_seen": "2026-09-04",
     "article_generated": false
+  },
+  "Aktobe": {
+    "destination": "Aktobe",
+    "first_seen": "2026-09-05",
+    "article_generated": false
+  },
+  "Astana": {
+    "destination": "Astana",
+    "first_seen": "2026-09-05",
+    "article_generated": false
+  },
+  "Samarkand": {
+    "destination": "Samarkand",
+    "first_seen": "2026-09-05",
+    "article_generated": false
   }
 }
